@@ -2079,42 +2079,6 @@ EXPOSE 3000
 CMD ["npm", "start"]
 ```
 
-#### CI/CD Pipeline
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy to Production
 
-on:
-  push:
-    branches: [main]
+ 
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '18'
-      - name: Install dependencies
-        run: npm install
-      - name: Run tests
-        run: npm test
-  deploy:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '18'
-      - name: Install dependencies
-        run: npm install --production
-      - name: Build the project
-        run: npm run build
-      - name: Deploy to server
-        run: |
-          ssh user@server "cd /path/to/app && git pull && npm install --production && pm2 restart all"
-```
