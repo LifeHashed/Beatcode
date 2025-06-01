@@ -1,0 +1,257 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum QuestionDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Timeline {
+  THIRTY_DAYS
+  THREE_MONTHS
+  SIX_MONTHS
+  MORE_THAN_SIX_MONTHS
+  OLD
+}
+
+enum ProgressStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+enum RemarkType {
+  NOTE
+  HINT
+  SOLUTION
+  QUESTION
+}
+
+enum NotificationType {
+  GENERAL
+  ACHIEVEMENT
+  REMINDER
+  SYSTEM
+}
+
+enum RemarkStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum FeedbackType {
+  FEEDBACK
+  FEATURE_RECOMMENDATION
+  NEW_QUESTION
+  BUG_REPORT
+  ADMIN_MESSAGE
+}
+
+enum FeedbackStatus {
+  NEW
+  SEEN
+  RESPONDED
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@index([provider])
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  password      String?
+  phone         String?        @unique
+  role          UserRole       @default(USER)
+  username      String?        @unique
+  createdAt     DateTime       @default(now())
+  emailVerified DateTime?
+  image         String?
+  updatedAt     DateTime       @updatedAt
+  accounts      Account[]
+  favorites     Favorite[]
+  notifications Notification[]
+  questions     Question[]
+  feedbackSent     Feedback[] @relation("FeedbackFrom")
+  feedbackReceived Feedback[] @relation("FeedbackTo")
+  remarks       Remark[]
+  sessions      Session[]
+  progress      UserProgress[]
+
+  @@index([email])
+  @@index([username])
+  @@index([role])
+  @@index([createdAt])
+  @@index([phone])
+}
+
+model Question {
+  id           Int                @id @default(autoincrement())
+  title        String             @unique
+  difficulty   QuestionDifficulty
+  frequency    Float?             @default(0)
+  acceptance   Float?             @default(0)
+  link         String
+  topics       String
+  company      String
+  timeline     Timeline           @default(OLD)
+  addedById    Int?
+  createdAt    DateTime           @default(now())
+  description  String?            @db.Text
+  leetcodeLink String?
+  updatedAt    DateTime           @updatedAt
+  favorites    Favorite[]
+  addedBy      User?              @relation(fields: [addedById], references: [id], onDelete: SetNull)
+  remarks      Remark[]
+  progress     UserProgress[]
+
+  @@index([difficulty])
+  @@index([company])
+  @@index([addedById])
+  @@index([createdAt])
+  @@index([title])
+  @@index([timeline])
+  @@index([frequency])
+  @@index([acceptance])
+}
+
+model UserProgress {
+  id          Int            @id @default(autoincrement())
+  userId      Int
+  questionId  Int
+  status      ProgressStatus @default(PENDING)
+  completed   Boolean        @default(false)
+  completedAt DateTime?
+  timeSpent   Int?
+  notes       String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  question    Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@index([userId])
+  @@index([questionId])
+  @@index([status])
+  @@index([completed])
+}
+
+model Remark {
+  id         Int          @id @default(autoincrement())
+  userId     Int
+  questionId Int
+  content    String       @db.Text
+  status     RemarkStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+  type       RemarkType   @default(NOTE)
+  updatedAt  DateTime     @updatedAt
+  question   Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([questionId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model Favorite {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  questionId Int
+  createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@index([userId])
+  @@index([questionId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expires])
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  title     String
+  body      String
+  type      NotificationType @default(GENERAL)
+  link      String?
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model Feedback {
+  id          String   @id @default(cuid())
+  type        FeedbackType
+  title       String
+  message     String   @db.Text
+  status      FeedbackStatus @default(NEW)
+  
+  fromUserId  Int
+  fromUser    User     @relation("FeedbackFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  
+  toUserId    Int?
+  toUser      User?    @relation("FeedbackTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  
+  toRole      Role?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("feedbacks")
+}
