@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       prisma.question.count(),
       
       // Active users today (users with progress today)
-      prisma.progress.groupBy({
+      prisma.UserProgress.groupBy({
         by: ['userId'],
         where: {
           createdAt: {
