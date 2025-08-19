@@ -6,7 +6,7 @@ import { hash } from 'bcryptjs';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -15,7 +15,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const adminId = parseInt(params.id);
+    const adminId = parseInt(context.params.id);
 
     // Check if admin exists
     const existingAdmin = await db.user.findUnique({
