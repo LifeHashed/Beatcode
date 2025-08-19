@@ -1,4 +1,4 @@
-simport { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     const questions = [];
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
-      const values = [];
+      const values:any = [];
       let current = '';
       let inQuotes = false;
       
