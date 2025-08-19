@@ -45,7 +45,7 @@ export async function DELETE(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -54,7 +54,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const adminId = parseInt(params.id);
+    const adminId = parseInt(context.params.id);
     const body = await request.json();
     const { name, email, username, password } = body;
 
