@@ -11,7 +11,7 @@ const updateSchema = z.object({
 // GET - Get specific feedback
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -26,7 +26,8 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const feedbackId = parseInt(params.id);
+    const { id } = await params;
+    const feedbackId = parseInt(id);
     
     const feedback = await prisma.feedback.findUnique({
       where: { id: feedbackId },
@@ -68,7 +69,7 @@ export async function GET(
 // PATCH - Update feedback status
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -83,7 +84,8 @@ export async function PATCH(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const feedbackId = params.id;
+    const { id } = await params;
+    const feedbackId = parseInt(id);
     const body = await request.json();
     const validatedData = updateSchema.parse(body);
 

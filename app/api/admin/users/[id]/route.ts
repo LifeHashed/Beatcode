@@ -6,7 +6,7 @@ import { hash } from 'bcryptjs';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -26,7 +26,8 @@ export async function PUT(
       );
     }
 
-    const userId = parseInt(params.id);
+    const { id } = await params;
+    const userId = parseInt(id);
     if (isNaN(userId)) {
       return NextResponse.json(
         { message: 'Invalid user ID' },
@@ -163,7 +164,7 @@ export async function PUT(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -175,7 +176,8 @@ export async function GET(
       );
     }
 
-    const userId = parseInt(params.id);
+    const { id } = await params;
+    const userId = parseInt(id);
     if (isNaN(userId)) {
       return NextResponse.json(
         { message: 'Invalid user ID' },

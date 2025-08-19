@@ -11,7 +11,7 @@ const replySchema = z.object({
 // POST - Reply to feedback
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -26,7 +26,7 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const feedbackId = params.id;
+    const { id: feedbackId } = await params;
     const body = await request.json();
     const validatedData = replySchema.parse(body);
 
