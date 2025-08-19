@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { parse } from 'csv-parse/sync';
+import { parse } from "csv-parse";
 
 export async function POST(req: NextRequest) {
   try {
