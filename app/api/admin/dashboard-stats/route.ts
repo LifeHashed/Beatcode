@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       }).then(result => result.length),
       
       // Most solved question
-      prisma.progress.groupBy({
+      prisma.userProgress.groupBy({
         by: ['questionId'],
         _count: {
           questionId: true

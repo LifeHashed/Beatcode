@@ -12,7 +12,7 @@ export async function GET() {
 
     // Get comprehensive user progress data
     const [progress, favorites, recentActivity] = await Promise.all([
-      prisma.progress.findMany({
+      prisma.userProgress.findMany({
         where: { userId: session.user.id },
         include: { 
           problem: {
@@ -27,7 +27,7 @@ export async function GET() {
         where: { userId: session.user.id },
         include: { problem: true }
       }),
-      prisma.progress.findMany({
+      prisma.userProgress.findMany({
         where: { userId: session.user.id },
         include: { problem: true },
         orderBy: { updatedAt: 'desc' },
@@ -59,7 +59,7 @@ export async function GET() {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     
-    const weeklyProgress = await prisma.progress.findMany({
+    const weeklyProgress = await prisma.userProgres.findMany({
       where: {
         userId: session.user.id,
         updatedAt: { gte: oneWeekAgo }

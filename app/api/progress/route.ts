@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
     if (problemId) {
       // Get specific problem progress
-      const progress = await prisma.progress.findUnique({
+      const progress = await prisma.userProgress.findUnique({
         where: {
           userId_problemId: {
             userId: session.user.id,
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ progress });
     } else {
       // Get all user progress
-      const progress = await prisma.progress.findMany({
+      const progress = await prisma.userProgress.findMany({
         where: { userId: session.user.id },
         include: { problem: true },
         orderBy: { updatedAt: 'desc' },
